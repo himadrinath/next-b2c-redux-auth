@@ -1,9 +1,26 @@
-import React from 'react'
+import React, {Component} from 'react'
 import Link from 'next/link'
 import Head from '../components/head'
 import Nav from '../components/nav'
+import { connect } from 'react-redux'
+import {authStart, authFail, authSuccess} from '../store/actions/authActions'
 
-const Home = () => (
+export class Home extends Component {
+
+
+  componentDidMount(){
+    this.startLogin();
+  }
+
+  startLogin=()=>{
+    const {dispatch} = this.props
+    dispatch(authStart());
+  }
+
+  render()
+  {
+
+    return(
   <div>
     <Head title="Home" />
     <Nav />
@@ -86,6 +103,13 @@ const Home = () => (
       }
     `}</style>
   </div>
-)
+    )
+    }
+    }
 
-export default Home
+    const mapStateToProps = state => {
+      const newState = {...state}
+      return newState;
+    }
+
+export default connect(mapStateToProps)(Home);
