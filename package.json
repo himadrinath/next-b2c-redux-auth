@@ -2,8 +2,10 @@
   "name": "create-next-example-app",
   "scripts": {
     "dev": "next",
-    "build": "next build",
-    "start": "next start"
+  "build": "next build",
+  "start": "next start -p $PORT",
+  "heroku-postbuild": "npm run build",
+  "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
     "next": "^7.0.2",
