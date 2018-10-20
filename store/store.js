@@ -9,7 +9,7 @@ import {reducer} from '../store/reducers/authReducer'
 // export const serverRenderClock = (isServer) => dispatch => {
 //   return dispatch({ type: actionTypes.TICK, light: !isServer, ts: Date.now() })
 // }
-
+//const initState={}
 
 
 export function initializeStore (initialState) {
