@@ -8,7 +8,6 @@ import Cookies from 'next-cookies'
 import jwtDecode from 'jwt-decode'
 import * as Msal  from 'msal'
 import {IdToken} from '../node_modules/msal/lib-commonjs/IdToken'
-//import {ClientInfo} from '../node_modules/msal/lib-commonjs/ClientInfo'
 import Authentication from '../lib/authentication';
 import {authStart, authFail, authSuccess} from '../store/actions/authActions'
 
@@ -18,36 +17,9 @@ import {authStart, authFail, authSuccess} from '../store/actions/authActions'
 export class Home extends Component {
   static getInitialProps(context ) {
     const userAgent = context.req ? context.req.headers['user-agent'] : navigator.userAgent
-    //console.log(context.req ? context.req.headers.cookie: 'none')
     const {token}= Cookies(context)
 
-    //console.log('user :' + user)
-
     const login_user = token ? jwtDecode(token): null
-
-    //const identityProvider= login_user.iss
-    //const idToken= user
-    
-    // const newUser= new Msal.User.createUser(login_user, null, 'https://login.microsoftonline.com/tfp/auth.linklookr.com/B2C_1_sign_in_up')
-
-    // console.log(newUser)
-    // Msal.User.createUser(IdToken(acc_token), )
-
-    //console.log('token: '+token)
-    //console.log(getInitialProps(context));
-    // return { userAgent }
-    //const pageProps= getInitialProps(context)
-
-    if(context)
-    {
-      const { req, query} =context
-    console.log(query)
-    }
-
-    // if(typeof window !== 'undefined' )
-    // {
-    //   console.log(window.location)
-    // }
 
     return {userAgent, token: token? token: null, user: login_user}
   }
@@ -64,33 +36,9 @@ export class Home extends Component {
   }
 
   componentWillMount(){
-    
-      // 
-
-    //   if(typeof window !== 'undefined' && this.props.user !==null)
-    // {
-    // const idToken = new IdToken(this.props.token);
-    //   const rawClientInfo = jsCookie.get('clientInfo');
-    //   const clientInfo = new ClientInfo(rawClientInfo)
-    //   const newUser = Msal.User.createUser(idToken, clientInfo, 'https://login.microsoftonline.com/tfp/auth.linklookr.com/B2C_1_sign_in_up');
-    // console.log(newUser)
-    //     if(!newUser)
-    //     {
-    //       this.setState({isAuth: true})
-    //     }
-    // }
   }
 
   componentDidMount(){
-    // if(!localStorage.getItem('msal.client.info'))
-    // {
-    //   this.auth.getToken().then((access_token)=>{
-    //     this.setState({token: access_token})
-    //     console.log("user created: "+ access_token);
-    //   });
-    // }
-
-    //console.log("access_token:" +this.auth.getAccessToken())
 
     if(!this.auth.getUser() && this.state.isAuth)
     {
@@ -112,7 +60,6 @@ export class Home extends Component {
     
     console.log(this.auth.getUser());
     const isLogedin= this.auth.getUser() ?  true :  false;
-   //this.setState({isAuth: isLogedin }) 
   }
 
   initLogin=()=>{
@@ -126,9 +73,6 @@ export class Home extends Component {
       {
       this.setState({isAuth: true})
       var inSixtyMinutes = new Date(new Date().getTime() + 60 * 60 * 1000)
-      //jsCookie.set("token", token)
-      // const rawClientInfo = localStorage.getItem('msal.client.info')
-      // jsCookie.set('clientInfo', rawClientInfo)
       jsCookie.set("token", token, {expires: inSixtyMinutes})
       dispatch(authSuccess(token))
       }
