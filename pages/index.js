@@ -17,11 +17,18 @@ import {authStart, authFail, authSuccess} from '../store/actions/authActions'
 export class Home extends Component {
   static getInitialProps(context ) {
     const userAgent = context.req ? context.req.headers['user-agent'] : navigator.userAgent
-    const {token}= Cookies(context)
+    const {reduxStore}= context
 
-    const login_user = token ? jwtDecode(token): null
+    const isServer= !!context.req
+    
+    const {access_token}= Cookies(context)
+    const login_user = access_token ? jwtDecode(access_token): null
 
-    return {userAgent, token: token? token: null, user: login_user}
+    if(login_user && isServer)
+    {
+        reduxStore.dispatch(authSuccess(access_token))
+    }
+    return {userAgent: userAgent}
   }
 
   constructor(props)
@@ -30,9 +37,7 @@ export class Home extends Component {
     this.state={
       isAuth: this.props.user? true : this.props.isAuth
     }
-    this.auth= new Authentication(),
-    this.initUser={}
-    //console.log(this.props)
+    this.auth= new Authentication()
   }
 
   componentWillMount(){
@@ -45,12 +50,20 @@ export class Home extends Component {
       console.log('user not found')
 
       const idToken = new IdToken(this.props.token);
-      // const rawClientInfo = jsCookie.get('clientInfo');
-      // const clientInfo = new ClientInfo(rawClientInfo)
-      const newUser = Msal.User.createUser(idToken, null, 'https://login.microsoftonline.com/tfp/auth.linklookr.com/B2C_1_sign_in_up');
+      const utid= '{your active directory domain id}'
+      const uid= this.props.user.oid+ '-'+ this.props.user.tfp
+      const clientInfo = {uid: uid ,utid: utid }
+      const newUser = Msal.User.createUser(idToken, clientInfo, 'https://login.microsoftonline.com/tfp/{domain name}/{policy}');
 
       this.auth.acquireUserTokenSilent(newUser).then(data=>{
-        console.log(data)
+        const {newIdToken} ={...data}
+        
+        if(newIdToken)
+        {
+          jsCookie.remove('access_token')
+          const inSixtyMinutes = new Date(new Date().getTime() + 60 * 60 * 1000)
+        jsCookie.set("access_token", newIdToken, {expires: inSixtyMinutes})
+        }
       }).catch(error=>{
         console.log(error)
       })
@@ -58,8 +71,8 @@ export class Home extends Component {
 
     
     
-    console.log(this.auth.getUser());
-    const isLogedin= this.auth.getUser() ?  true :  false;
+    // console.log(this.auth.getUser());
+    // const isLogedin= this.auth.getUser() ?  true :  false;
   }
 
   initLogin=()=>{
@@ -73,13 +86,13 @@ export class Home extends Component {
       {
       this.setState({isAuth: true})
       var inSixtyMinutes = new Date(new Date().getTime() + 60 * 60 * 1000)
-      jsCookie.set("token", token, {expires: inSixtyMinutes})
+      jsCookie.set("access_token", token, {expires: inSixtyMinutes})
       dispatch(authSuccess(token))
       }
     })
   }
   else{
-    jsCookie.remove('token');
+    jsCookie.remove('access_token');
     this.setState({isAuth: false});
     this.auth.logout();
   }

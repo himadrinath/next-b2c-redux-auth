@@ -1,11 +1,13 @@
+import jwtDecode from 'jwt-decode'
 import * as actionTypes from '../actionTypes'
 
 const initialState = {
-  //token: null,
   userId: null,
-  isAuth: false,
   loading: false,
   error: false,
+  token: null,
+  user: null,
+  isAuth: false
 }
   
   // REDUCERS
@@ -16,14 +18,16 @@ const initialState = {
           loading: true
         })
       case actionTypes.AUTH_SUCCESS:
+      const login_user = jwtDecode(action.token)
         return Object.assign({}, state, {
-          //token: action.token,
+          token: action.token,
+          user: {...login_user},
+          userId: login_user.oid,
           loading: false,
           isAuth: true
         })
       case actionTypes.AUTH_FAIL:
         return Object.assign({}, state, {
-            //token: null,
             isAuth: false,
             userId: null,
           loading: false,
