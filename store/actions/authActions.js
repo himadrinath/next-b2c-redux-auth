@@ -4,10 +4,10 @@ export const authStart=() => dispatch => {
     dispatch({ type: actionTypes.AUTH_START})
 }
 
-export const authSuccess = (access_token) => dispatch => {
-  return dispatch({ type: actionTypes.AUTH_SUCCESS, token: access_token })
+export const authSuccess = (uuid, name) => dispatch => {
+  return dispatch({ type: actionTypes.AUTH_SUCCESS, uuid: uuid, name: name })
 }
 
 export const authFail = (authError) => dispatch => {
-  return dispatch({ type: actionTypes.AUTH_FAIL, err:  authError })
+  return dispatch({ type: actionTypes.AUTH_FAIL, error:  authError })
 }

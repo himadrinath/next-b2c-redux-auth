@@ -1,5 +1,5 @@
-import Authentication from '../../../lib/authentication'
-const auth= new Authentication()
+import {msalApp} from '../../../lib/authentication'
+//const auth= new msalApp()
 
 export default()=>{
     return(

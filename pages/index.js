@@ -1,106 +1,53 @@
 import React, {Component} from 'react'
-import Link from 'next/link'
+//import Link from 'next/link'
+import {msalApp} from '../lib/authentication';
 import Head from '../components/head'
 import Nav from '../components/nav'
+import securePage from '../hoc/index'
 import { connect } from 'react-redux'
-import jsCookie from 'js-cookie'
-import Cookies from 'next-cookies'
 import jwtDecode from 'jwt-decode'
-import * as Msal  from 'msal'
-import {IdToken} from '../node_modules/msal/lib-commonjs/IdToken'
-import Authentication from '../lib/authentication';
-import {authStart, authFail, authSuccess} from '../store/actions/authActions'
+import {authStart, authFail} from '../store/actions/authActions'
 
 
 
 
 export class Home extends Component {
-  static getInitialProps(context ) {
-    const userAgent = context.req ? context.req.headers['user-agent'] : navigator.userAgent
-    const {reduxStore}= context
+  static async getInitialProps( {ctx} ) {
 
-    const isServer= !!context.req
-    
-    const {access_token}= Cookies(context)
-    const login_user = access_token ? jwtDecode(access_token): null
+    const {reduxStore, pathname, query, req, res}= ctx
+  const auth_token= nextCookie(ctx)["msal.idtoken"]
+  let session=null
+  try{
+    session= jwtDecode(auth_token)
+  }
+  catch{
+    session= null
+  }
+  const isServer= ctx.req ? true: false
+  const userAgent = ctx.req ? ctx.req.headers['user-agent'] : navigator.userAgent
 
-    if(login_user && isServer)
-    {
-        reduxStore.dispatch(authSuccess(access_token))
-    }
+  if(isServer && pathname!=="/auth/success"){
+    console.log(session)
+  if(session){
+    reduxStore.dispatch(authStart())
+  }
+  else
+  {
+    reduxStore.dispatch(authFail('user not logged in from _app.js'))
+  }
+}
     return {userAgent: userAgent}
   }
-
   constructor(props)
   {
     super(props)
     this.state={
-      isAuth: this.props.user? true : this.props.isAuth
     }
-    this.auth= new Authentication()
+    this.auth= new msalApp();
   }
 
-  componentWillMount(){
-  }
-
-  componentDidMount(){
-
-    if(!this.auth.getUser() && this.state.isAuth)
-    {
-      console.log('user not found')
-
-      const idToken = new IdToken(this.props.token);
-      const utid= '{your active directory domain id}'
-      const uid= this.props.user.oid+ '-'+ this.props.user.tfp
-      const clientInfo = {uid: uid ,utid: utid }
-      const newUser = Msal.User.createUser(idToken, clientInfo, 'https://login.microsoftonline.com/tfp/{domain name}/{policy}');
-
-      this.auth.acquireUserTokenSilent(newUser).then(data=>{
-        const {newIdToken} ={...data}
-        
-        if(newIdToken)
-        {
-          jsCookie.remove('access_token')
-          const inSixtyMinutes = new Date(new Date().getTime() + 60 * 60 * 1000)
-        jsCookie.set("access_token", newIdToken, {expires: inSixtyMinutes})
-        }
-      }).catch(error=>{
-        console.log(error)
-      })
-    }
-
-    
-    
-    // console.log(this.auth.getUser());
-    // const isLogedin= this.auth.getUser() ?  true :  false;
-  }
-
-  initLogin=()=>{
-
-    if(!this.state.isAuth)
-    {
-    const {dispatch} = this.props
-    dispatch(authStart());
-    this.auth.login().then(token=>{
-      if(token!==null)
-      {
-      this.setState({isAuth: true})
-      var inSixtyMinutes = new Date(new Date().getTime() + 60 * 60 * 1000)
-      jsCookie.set("access_token", token, {expires: inSixtyMinutes})
-      dispatch(authSuccess(token))
-      }
-    })
-  }
-  else{
-    jsCookie.remove('access_token');
-    this.setState({isAuth: false});
-    this.auth.logout();
-  }
-
-  }
-
-  handleLogClick=()=>{
-    this.initLogin();
+  handleLogOutClick=()=>{
+    this.auth.app.logout();
   }
 
   render()
@@ -112,36 +59,25 @@ export class Home extends Component {
     <Nav />
 
     <div className="hero">
-      <h1 className="title">Welcome to Next!</h1>
+      <h1 className="title">{this.props.name}</h1>
       <p className="description">
-        To get started, edit <code>pages/index.js</code> and save to reload.
+      <button className="btn btn-primary" onClick={()=> this.handleLogOutClick()}>logout</button>
       </p>
       <div className="row">
-      <button className="btn btn-primary" onClick={()=> this.handleLogClick()}>{ this.state.isAuth ? "logout" : "login"}</button>
+      
       </div>
 
       <div className="row">
-        <Link href="https://github.com/zeit/next.js#getting-started">
-          <a className="card">
-            <h3>Getting Started &rarr;</h3>
-            <p>Learn more about Next on Github and in their examples</p>
-          </a>
-        </Link>
-        <Link href="https://open.segment.com/create-next-app">
-          <a className="card">
-            <h3>Examples &rarr;</h3>
-            <p>
-              Find other example boilerplates on the{' '}
-              <code>create-next-app</code> site
-            </p>
-          </a>
-        </Link>
-        <Link href="https://github.com/segmentio/create-next-app">
-          <a className="card">
-            <h3>Create Next App &rarr;</h3>
-            <p>Was this tool helpful? Let us know how we can improve it</p>
-          </a>
-        </Link>
+        <div className="card">
+
+        <iframe loading="lazy" width="560" height="315" src="https://www.youtube.com/embed/GmBKlXED9Ug" frameBorder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>
+
+        </div>
+        <div className="card">
+
+        <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/PPs1z5EYPuU" frameBorder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>
+
+        </div>
       </div>
     </div>
 
@@ -170,7 +106,6 @@ export class Home extends Component {
       }
       .card {
         padding: 18px 18px 24px;
-        width: 220px;
         text-align: left;
         text-decoration: none;
         color: #434343;
@@ -201,4 +136,4 @@ export class Home extends Component {
       return newState;
     }
 
-export default connect(mapStateToProps)(Home);
+export default connect(mapStateToProps)(securePage(Home));
