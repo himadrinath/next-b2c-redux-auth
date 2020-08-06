@@ -1,6 +1,6 @@
 # MSAL.js (Microsoft Authentication Library for Javascript) + Next.js Sample
 
-# [MSAL.js (Microsoft Authentication Library for Javascript) + Next.js Sample using react Context](https://github.com/himadrinath/next-b2c-redux-auth/tree/react_hook)
+# [MSAL.js (Microsoft Authentication Library for Javascript) + Next.js Sample using react Context + Hook](https://github.com/himadrinath/next-b2c-redux-auth/tree/react_hook)
 
 
 This project was bootstrapped with [Create Next App](https://github.com/segmentio/create-next-app).
