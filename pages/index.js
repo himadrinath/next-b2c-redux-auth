@@ -1,67 +1,43 @@
-import React, {Component} from 'react'
-//import Link from 'next/link'
+import React, {useEffect, useContext} from 'react'
 import {msalApp} from '../lib/authentication';
 import Head from '../components/head'
 import Nav from '../components/nav'
-import securePage from '../hoc/index'
-import { connect } from 'react-redux'
 import jwtDecode from 'jwt-decode'
-import {authStart, authFail} from '../store/actions/authActions'
+import nextCookie from 'next-cookies'
+import authContext from '../context/authContext';
 
 
 
 
-export class Home extends Component {
-  static async getInitialProps( {ctx} ) {
 
-    const {reduxStore, pathname, query, req, res}= ctx
-  const auth_token= nextCookie(ctx)["msal.idtoken"]
-  let session=null
-  try{
-    session= jwtDecode(auth_token)
-  }
-  catch{
-    session= null
-  }
-  const isServer= ctx.req ? true: false
-  const userAgent = ctx.req ? ctx.req.headers['user-agent'] : navigator.userAgent
+  const Home=(props)=>{
+    const context = useContext(authContext)
+    
+  const auth= new msalApp()
 
-  if(isServer && pathname!=="/auth/success"){
-    console.log(session)
-  if(session){
-    reduxStore.dispatch(authStart())
-  }
-  else
-  {
-    reduxStore.dispatch(authFail('user not logged in from _app.js'))
-  }
-}
-    return {userAgent: userAgent}
-  }
-  constructor(props)
-  {
-    super(props)
-    this.state={
+  useEffect(()=>{
+    // if(props.authinit)
+    // {
+    //   context.acquire()
+    // }
+
+    if (document.cookie.split(';').some((item) => item.trim().startsWith('msal.idtoken=')))
+    {
+      context.acquire()
     }
-    this.auth= new msalApp();
-  }
+  },[])
 
-  handleLogOutClick=()=>{
-    this.auth.app.logout();
-  }
-
-  render()
-  {
-
+  
     return(
   <div>
     <Head title="Home" />
     <Nav />
-
+      { context.auth.isAuth 
+      ?
     <div className="hero">
-      <h1 className="title">{this.props.name}</h1>
+      <h1 className="title">{context.auth.name}</h1>
       <p className="description">
-      <button className="btn btn-primary" onClick={()=> this.handleLogOutClick()}>logout</button>
+      <button className="btn btn-primary" onClick={()=> context.signout()}>logout</button>
       </p>
       <div className="row">
       
@@ -80,7 +56,16 @@ export class Home extends Component {
         </div>
       </div>
     </div>
-
+    :
+    <div>
+      <div className="centered">
+    <img src="./images/scenario-idproofing.png"/>
+    </div>
+    <div className="centered">
+    <h2>please sign in</h2><button onClick={()=> context.signin()}>sign in</button>
+    </div>
+    </div>
+  }
     <style jsx>{`
       .hero {
         width: 100%;
@@ -125,15 +110,41 @@ export class Home extends Component {
         font-size: 13px;
         color: #333;
       }
+      .centered {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        
+        width: 100%;
+      }
     `}</style>
   </div>
+    
     )
     }
-    }
 
-    const mapStateToProps = state => {
-      const newState = {...state}
-      return newState;
-    }
 
-export default connect(mapStateToProps)(securePage(Home));
+
+export async function getServerSideProps(ctx) {
+  const {pathname, query, req, res}= ctx
+const auth_token= nextCookie(ctx)["msal.idtoken"]
+let session=null
+try{
+  session= jwtDecode(auth_token)
+}
+catch{
+  session= null
+}
+const userAgent = ctx.req ? ctx.req.headers['user-agent'] : navigator.userAgent
+
+let authinit= false
+
+if(session){
+  authinit= true
+}
+  return {props:{userAgent: userAgent, authinit: authinit}}
+}
+
+export default Home;

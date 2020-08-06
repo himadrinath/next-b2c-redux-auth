@@ -1,19 +1,26 @@
 import App from 'next/app'
 import React from 'react'
-import withReduxStore from '../lib/redux-store'
-import { Provider } from 'react-redux'
+import GlobalState from '../context/GlobalState'
 
 class MyApp extends App {
 
+
+
+
   render () {
-    const {Component, pageProps, reduxStore} = this.props
+    const {Component, pageProps} = this.props
     return (
       
-        <Provider store={reduxStore}>
+      <GlobalState>
           <Component {...pageProps} />
-        </Provider>
+      </GlobalState>
     )
   }
 }
 
-export default withReduxStore(MyApp)
+// MyApp.propTypes = {
+//   Component: PropTypes.elementType.isRequired,
+//   pageProps: PropTypes.object.isRequired,
+// };
+
+export default MyApp
