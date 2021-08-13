@@ -11,7 +11,7 @@
     "js-cookie": "^2.2.1",
     "jwt-decode": "^2.2.0",
     "msal": "^1.2.2",
-    "next": "^9.3.5",
+    "next": "^11.1.0",
     "next-cookies": "^2.0.3",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
